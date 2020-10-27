@@ -10,7 +10,7 @@ require('sinon-as-promised')(Bluebird);
 var Sequelize = require('sequelize');
 unexpected.addType({
   name: 'Sequelize.Instance',
-  identify: /^[45]/.test(Sequelize.version) ?
+  identify: /^[456]/.test(Sequelize.version) ?
     function (value) {
       return value && value instanceof Sequelize.Model && 'isNewRecord' in value;
     } :
@@ -18,7 +18,9 @@ unexpected.addType({
       return value && value instanceof Sequelize.Instance;
     },
   inspect: function (value, depth, output, inspect) {
-    const name = value.name || value.$modelOptions.name || value._modelOptions.name; // v3 vs v4
+    const name = value.name
+      || value.$modelOptions && value.$modelOptions.name // v3
+      || value._modelOptions && value._modelOptions.name; // v4+
     output
       .text(name.singular).text('(')
       .append(inspect(value.get(), depth))
